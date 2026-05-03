@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galeri Gambar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap');
+
+  :root {
+    --primary: #6c63ff;
+    --secondary: #ff6584;
+    --card: #ffffff;
+    --text: #2d2d4e;
+    --shadow: 0 8px 32px rgba(108,99,255,0.13);
+    --biru-tua: #1e3a8a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(150deg, #0d2137 0%, #1a3a5c 50%, #1f5f74 100%);
+    color: #fff;
+    padding-bottom: 40px;
+  }
+
+  .rainbow {
+    position: fixed; top: 0; left: 0; right: 0; height: 6px; z-index: 100;
+    background: repeating-linear-gradient(90deg,
+      #E63946 0 16.6%, #FFD60A 16.6% 33.2%, #2DC653 33.2% 49.8%,
+      #457B9D 49.8% 66.4%, #FF9F1C 66.4% 83%, #7B2D8B 83% 100%);
+  }
+
+  .nav {
+    position: sticky; top: 0; z-index: 90;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px;
+    background: rgba(245,240,232,.92); backdrop-filter: blur(10px);
+    border-bottom: 2px solid rgba(29,53,87,.1); margin-top: 6px;
+  }
+  .nav-left { display: flex; gap: 8px; }
+  .nav-btn {
+    padding: 7px 16px; border-radius: 50px; font-size: .82rem; font-weight: 800;
+    cursor: pointer; text-decoration: none; border: 2px solid; transition: all .2s;
+  }
+  .btn-home { background: var(--biru-tua); color: #fff; border-color: var(--biru-tua); }
+  .btn-home:hover { opacity: .85; }
+  .btn-menu { background: transparent; color: var(--biru-tua); border-color: var(--biru-tua); }
+  .btn-menu:hover { background: var(--biru-tua); color: #fff; }
+  .nav-title { font-family: 'Baloo 2', cursive; font-size: 1rem; color: var(--biru-tua); font-weight: 700; }
+
+  .hero {
+    background: linear-gradient(135deg, var(--biru-tua) 0%, #457B9D 60%, #A8DADC 100%);
+    color: #fff; text-align: center; padding: 60px 24px 50px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '🗺️'; font-size: 200px; position: absolute;
+    top: -40px; right: -30px; opacity: .06; line-height: 1;
+  }
+  .hero-badge {
+    display: inline-block; background: #FFD60A; color: #000;
+    font-weight: 900; padding: 6px 22px; border-radius: 50px; font-size: .82rem;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;
+  }
+  .hero h1 { font-family: 'Baloo 2', cursive; font-size: clamp(2rem, 6vw, 3.2rem); margin-bottom: 10px; }
+  .hero h1 em { color: #FFD60A; font-style: normal; }
+
+  main { padding: 28px 16px 40px; max-width: 700px; margin: 0 auto; }
+
+  .section-title {
+    font-family: 'Baloo 2', cursive; font-size: 1.2rem; font-weight: 800;
+    color: #b9acff; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .fun-badge {
+    display: inline-block; background: linear-gradient(135deg, #43e97b, #38f9d7);
+    color: white; border-radius: 10px; padding: 3px 10px;
+    font-size: 0.78rem; font-weight: 800;
+  }
+
+  .filter-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .tab-btn {
+    padding: 8px 18px; border-radius: 20px; border: 2px solid var(--primary);
+    background: transparent; color: #c4bfff;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.82rem;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .tab-btn.active, .tab-btn:hover { background: var(--primary); color: white; }
+
+  .image-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 28px; }
+
+  .image-card {
+    background: var(--card); border-radius: 18px; box-shadow: var(--shadow);
+    overflow: hidden; transition: transform 0.22s, box-shadow 0.22s;
+    animation: fadeIn 0.4s ease both;
+  }
+  .image-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(108,99,255,0.22); }
+  .image-card.hidden { display: none; }
+
+  .img-wrap {
+    width: 100%; aspect-ratio: 4/3; overflow: hidden;
+    background: linear-gradient(135deg, #e0d7ff, #ffd6e7);
+    position: relative; cursor: pointer;
+  }
+  .img-wrap img {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block; transition: transform 0.3s;
+  }
+  .image-card:hover .img-wrap img { transform: scale(1.05); }
+
+  .img-wrap .emoji-fallback {
+    display: none; position: absolute; inset: 0;
+    align-items: center; justify-content: center; font-size: 3.5rem;
+  }
+  .img-wrap img.error { display: none; }
+  .img-wrap img.error ~ .emoji-fallback { display: flex; }
+
+  .img-label {
+    position: absolute; top: 8px; right: 8px;
+    color: white; border-radius: 8px; font-size: 0.68rem; font-weight: 800;
+    padding: 2px 8px; letter-spacing: 0.5px; z-index: 2;
+  }
+
+  .card-info { padding: 10px 12px 12px; }
+  .card-title { font-weight: 800; font-size: 0.95rem; margin-bottom: 3px; color: var(--text); }
+  .card-desc { font-size: 0.78rem; color: #888; line-height: 1.4; }
+
+  .lightbox {
+    display: none; position: fixed; inset: 0;
+    background: rgba(20,10,50,0.88); z-index: 999;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox-content {
+    background: white; border-radius: 22px; padding: 20px;
+    max-width: 440px; width: 100%; text-align: center;
+    position: relative; animation: popIn 0.3s cubic-bezier(.175,.885,.32,1.275);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .lightbox-img-wrap {
+    width: 100%; aspect-ratio: 4/3; border-radius: 14px; overflow: hidden;
+    background: linear-gradient(135deg, #e0d7ff, #ffd6e7);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 5rem; margin-bottom: 14px; position: relative;
+  }
+  .lightbox-img-wrap img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+  .lightbox-title { font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 800; color: var(--primary); margin-bottom: 8px; }
+  .lightbox-desc { font-size: 0.88rem; color: #666; line-height: 1.6; margin-bottom: 14px; }
+  .lightbox-close {
+    position: absolute; top: 12px; right: 14px;
+    font-size: 1.5rem; background: none; border: none; cursor: pointer; color: #aaa; font-weight: 900;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), #a78bfa);
+    color: white; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem;
+    border: none; border-radius: 14px; padding: 12px 20px; cursor: pointer;
+    transition: transform 0.18s; box-shadow: 0 4px 16px rgba(108,99,255,0.25);
+    display: block; text-align: center; text-decoration: none; width: 100%;
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:none; } }
+  @keyframes popIn  { from { opacity:0; transform:scale(0.85); } to { opacity:1; transform:scale(1); } }
+  @media (max-width: 480px) { .image-grid { gap: 10px; } }
+</style>
+</head>
+<body>
+
+<div class="rainbow"></div>
+
+<div class="nav">
+  <div class="nav-left">
+    <a href="index.html" class="nav-btn btn-home">🏠 Beranda</a>
+    <a href="menu.html" class="nav-btn btn-menu">← Menu</a>
+  </div>
+  <div class="nav-title">🖼️ Galeri Gambar</div>
+</div>
+
+<div class="hero">
+  <div class="hero-badge">Gambar Kebudayaan Daerah</div>
+  <h1>Daerahku <em>Kebanggaanku</em></h1>
+</div>
+
+<main>
+
+  <div class="section-title">
+    📂 Kategori
+    <span class="fun-badge">36 Foto</span>
+  </div>
+
+  <!-- Filter Tabs (tanpa tombol "Semua") -->
+  <div class="filter-tabs">
+    <button class="tab-btn active" onclick="filterCat('yogyakarta',this)">🏰 Yogyakarta</button>
+    <button class="tab-btn" onclick="filterCat('kalimantan',this)">🌿 Kalimantan</button>
+    <button class="tab-btn" onclick="filterCat('bali',this)">🌺 Bali</button>
+    <button class="tab-btn" onclick="filterCat('papua',this)">🦜 Papua</button>
+    <button class="tab-btn" onclick="filterCat('sulawesi',this)">🌊 Sulawesi Selatan</button>
+    <button class="tab-btn" onclick="filterCat('sumbar',this)">🏔️ Sumatra Barat</button>
+  </div>
+
+  <div class="image-grid">
+
+    <!-- ══ YOGYAKARTA ══ -->
+    <div class="image-card" data-cat="yogyakarta" onclick="openLight('yog-baju.jpg','👗','Surjan','Pakaian adat Yogyakarta mencerminkan filosofi Jawa yang dalam, dengan simbolisme Islam dan budaya keraton. Pakaian utama pria adalah Surjan (lurik/motif) dengan jarik, sementara wanita mengenakan Kebaya dan jarik.')">
+      <div class="img-wrap">
+        <img src="yog-baju.jpg" alt="Baju Adat Yogyakarta" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">👗</div>
+        <span class="img-label" style="background:#E63946">BAJU ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Surjan</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card" data-cat="yogyakarta" onclick="openLight('yog-makanan.jpeg','🍲','Gudeg ','Gudeg adalah makanan khas Yogyakarta berbahan dasar nangka muda (gori) yang dimasak lama dengan santan, gula aren, dan rempah, menghasilkan cita rasa manis-gurih dan warna coklat tua. Kuliner ikonik ini disajikan dengan krecek, ayam kampung, dan telur bacem, serta dikenal dalam dua jenis: kering dan basah')">
+      <div class="img-wrap">
+        <img src="yog-makanan.jpeg" alt="Gudeg Yogyakarta" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🍲</div>
+        <span class="img-label" style="background:#FF9F1C">MAKANAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Gudeg </div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card" data-cat="yogyakarta" onclick="openLight('yog-alat-musik.jpg','🎶','Gamelan','Gamelan adalah ansambel musik tradisional Indonesia, terutama di Jawa, Bali, dan Lombok, yang didominasi instrumen perkusi logam (perunggu/besi) seperti gong, kenong, saron, dan bonang. Berfungsi mengiringi upacara adat, tari, wayang, dan pertunjukan seni.')">
+      <div class="img-wrap">
+        <img src="yog-alat-musik.jpg" alt="Gamelan Jawa" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🎶</div>
+        <span class="img-label" style="background:#2DC653">ALAT MUSIK</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Gamelan</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card" data-cat="yogyakarta" onclick="openLight('yog-rumah-adat.jpg','🏯','Rumah Joglo','Rumah adat Joglo adalah rumah tradisional masyarakat Jawa (Jawa Tengah, Yogyakarta, Jawa Timur) dengan atap berbentuk limasan/gunung, disangga empat tiang utama (saka guru). Dahulu, Joglo adalah simbol status sosial bangsawan karena kemegahannya. Ciri khasnya mencakup teras luas (pendhapa), tata ruang simetris, dan ukiran filosofis.')">
+      <div class="img-wrap">
+        <img src="yog-rumah-adat.jpg" alt="Bangsal Kencono" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🏯</div>
+        <span class="img-label" style="background:#457B9D">RUMAH ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Rumah Joglo</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card" data-cat="yogyakarta" onclick="openLight('yog-tari.jpg','💃','Tari Bedhaya Ketawang','Tari Bedhaya Ketawang adalah tarian sakral keraton yang hanya dipentaskan pada upacara penobatan atau peringatan kenaikan tahta Sunan Surakarta. Tarian ini diyakini sebagai simbol hubungan spiritual dan percintaan antara raja-raja Mataram dengan Kanjeng Ratu Kidul, menjadikannya pusaka budaya yang penuh makna religius dan filosofis. Hingga kini, tarian ini tetap dijaga keraton Surakarta sebagai pusaka luhur yang tidak bisa dipisahkan dari tradisi Jawa.')">
+      <div class="img-wrap">
+        <img src="yog-tari.jpg" alt="Tari Bedhaya" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">💃</div>
+        <span class="img-label" style="background:#7B2FBE">TARIAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Tari Bedhaya Ketawang</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card" data-cat="yogyakarta" onclick="openLight('yog-peninggalan.jpg','🏰','Candi Prambanan','Candi Prambanan merupakan candi Hindu terbesar di Indonesia yang dibangun pada abad ke-9 dan termasuk dalam daftar Situs Warisan Dunia UNESCO, terletak sekitar 17 km dari pusat kota Jogja.')">
+      <div class="img-wrap">
+        <img src="yog-peninggalan.jpg" alt="Candi Prambanan" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🏰</div>
+        <span class="img-label" style="background:#6c63ff">WARISAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Candi Prambanan</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <!-- ══ KALIMANTAN ══ -->
+    <div class="image-card hidden" data-cat="kalimantan" onclick="openLight('kal-baju.png','🌺','Sangkarut','Baju adat Dayak Kalimantan Tengah (Kalteng), khususnya Dayak Ngaju, didominasi oleh Sangkarut (rompi kulit kayu) yang dihiasi manik-manik, uang logam, dan jimat, melambangkan kekuatan dan perlindungan. Pakaian ini digunakan dalam upacara adat, perkawinan, dan tari-tarian. Umumnya, busana ini dilengkapi aksesoris emas, bulu enggang, dan hiasan kepala.')">
+      <div class="img-wrap">
+        <img src="kal-baju.png" alt="Baju Adat Dayak" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🌺</div>
+        <span class="img-label" style="background:#E63946">BAJU ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Sangkarut</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="kalimantan" onclick="openLight('kal-juhu.webp','🍜','Juhu Singkah','Juhu Singkah (atau Juhu Umbut Rotan) adalah makanan berkuah khas Suku Dayak di Kalimantan Tengah berbahan dasar umbut rotan muda. Kuliner ini memiliki cita rasa unik—perpaduan gurih, sedikit pahit, dan segar—yang biasanya dimasak dengan ikan sungai, terong asam, atau santan, menjadikannya hidangan lezat dan bernutrisi.')">
+      <div class="img-wrap">
+        <img src="kal-juhu.webp" alt="Soto Banjar" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🍜</div>
+        <span class="img-label" style="background:#FF9F1C">MAKANAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Juhu Singkah</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="kalimantan" onclick="openLight('kal-sape.jpeg','🎸','Sape','Sampe (atau Sape) adalah alat musik petik tradisional khas suku Dayak di Kalimantan yang sering disebut gitar Kalimantan karena bentuknya menyerupai perahu dengan ornamen ukiran khas Dayak')">
+      <div class="img-wrap">
+        <img src="kal-sape.jpeg" alt="Sape" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🎸</div>
+        <span class="img-label" style="background:#2DC653">ALAT MUSIK</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Sape</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="kalimantan" onclick="openLight('kal-betang.jpg','🏠','Rumah Betang','Rumah Betang adalah rumah adat khas suku Dayak di Kalimantan yang berbentuk panggung panjang (bisa mencapai 100-150 meter), dihuni puluhan keluarga, dan menjadi pusat kehidupan komunal. Rumah ini melambangkan nilai kebersamaan, toleransi, dan kekeluargaan, serta dibangun tinggi menggunakan kayu ulin untuk menghindari banjir dan binatang buas.')">
+      <div class="img-wrap">
+        <img src="kal-betang.jpg" alt="Rumah Betang" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🏠</div>
+        <span class="img-label" style="background:#457B9D">RUMAH ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Rumah Betang</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="kalimantan" onclick="openLight('kal-tari.jpeg','🦅','Tari Mandau','Tari Mandau adalah seni tari tradisional suku Dayak, Kalimantan Tengah, yang menggambarkan keberanian, perjuangan, dan harga diri masyarakat Dayak dengan menggunakan Mandau (parang khas) dan talawang (perisai) sebagai properti..')">
+      <div class="img-wrap">
+        <img src="kal-tari.jpeg" alt="Tari Kancet Ledo" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🦅</div>
+        <span class="img-label" style="background:#7B2FBE">TARIAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Tari Mandau</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="kalimantan" onclick="openLight('kal-peninggalan.webp','⚔️','Istana Kuning','Istana Kuning (Kotawaringin Barat): Istana peninggalan Kesultanan Kutaringin yang dibangun oleh Pangeran Ratu Imanudin pada abad ke-19, saksi sejarah perkembangan Islam.')">
+      <div class="img-wrap">
+        <img src="kal-peninggalan.webp" alt="Mandau" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">⚔️</div>
+        <span class="img-label" style="background:#6c63ff">WARISAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Istana Kuning</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <!-- ══ BALI ══ -->
+    <div class="image-card hidden" data-cat="bali" onclick="openLight('ba-baju.png','👘','Payas Alit','Payas Alit adalah pakaian adat Bali yang paling sederhana, sering disebut payas nista, yang umum digunakan untuk sembahyang sehari-hari di Pura. Didominasi warna putih, pakaian ini melambangkan kesucian dan kesederhanaan. Pria mengenakan udeng dan kamen, sementara wanita mengenakan kebaya, kamen, dan selendang.')">
+      <div class="img-wrap">
+        <img src="ba-baju.png" alt="Baju Adat Bali" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">👘</div>
+        <span class="img-label" style="background:#E63946">BAJU ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Payas Alit</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="bali" onclick="openLight('ba-babi.webp','🍛','Babi Guling','Babi guling (be guling) adalah masakan khas Bali berupa satu ekor babi utuh yang perutnya diisi bumbu rempah (basa genep) dan sayuran, lalu dipanggang sambil diputar hingga kulitnya renyah dan berwarna kecokelatan. Hidangan ini populer dengan daging yang empuk, bumbu meresap, serta sering disajikan dengan nasi, lawar, sate lilit, dan sambal.')">
+      <div class="img-wrap">
+        <img src="ba-babi.webp" alt="Nasi Campur Bali" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🍛</div>
+        <span class="img-label" style="background:#FF9F1C">MAKANAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Babi Guling</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="bali" onclick="openLight('ba-rindik.jpg','🥁','Rindik','Rindik adalah alat musik tradisional Bali yang terbuat dari bilah bambu bernada selendro, dimainkan dengan cara dipukul menggunakan panggul. Alat ini biasanya terdiri dari 11-13 bilah bambu yang disusun di atas rangka kayu, sering dimainkan berpasangan untuk menghasilkan melodi tenang khas Bali.')">
+      <div class="img-wrap">
+        <img src="ba-rindik.jpg" alt="Gamelan Bali" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🥁</div>
+        <span class="img-label" style="background:#2DC653">ALAT MUSIK</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Rindik</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="bali" onclick="openLight('ba-rumah.jpg','🏡','Gapura Candi Bentar','Gapura Candi Bentar adalah gerbang terbelah simetris khas arsitektur Nusantara, khususnya Bali dan Jawa, yang terdiri dari dua bangunan serupa di kiri-kanan tanpa atap penghubung di bagian atas.')">
+      <div class="img-wrap">
+        <img src="ba-rumah.jpg" alt="Rumah Adat Bali" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🏡</div>
+        <span class="img-label" style="background:#457B9D">RUMAH ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Gapura Candi Bentar</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="bali" onclick="openLight('ba-tari.png','🔥','Tari Kecak','Tari Kecak adalah seni pertunjukan drama-tari tradisional Bali yang diciptakan pada 1930-an, dibawakan puluhan pria duduk melingkar, berseru "cak" secara berirama tanpa alat musik, dan sering menceritakan kisah Ramayana.')">
+      <div class="img-wrap">
+        <img src="ba-tari.png" alt="Tari Kecak" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🔥</div>
+        <span class="img-label" style="background:#7B2FBE">TARIAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Tari Kecak</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="bali" onclick="openLight('ba-pura.webp','⛩️','Pura Besakih','Pura Besakih adalah kompleks pura terbesar dan tersuci (Mother Temple) bagi umat Hindu di Bali, Indonesia, yang terletak di lereng barat daya Gunung Agung, Kabupaten Karangasem. Sebagai pusat kegiatan keagamaan, kompleks ini terdiri dari 1 Pura Pusat (Penataran Agung) dan 18 pura pendamping.')">
+      <div class="img-wrap">
+        <img src="ba-pura.webp" alt="Pura Besakih" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">⛩️</div>
+        <span class="img-label" style="background:#6c63ff">WARISAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Pura Besakih</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <!-- ══ PAPUA ══ -->
+    <div class="image-card hidden" data-cat="papua" onclick="openLight('pa-baju.png','🪶','Baju Adat Papua','Baju adat Papua terbuat dari bahan alam seperti kulit kayu, daun sagu kering, dan labu air, mencerminkan kedekatan masyarakat dengan alam. Pakaian ikonik meliputi Koteka (penutup kemaluan pria dari labu) dan Rok Rumbai (daun sagu). Aksesori umum mencakup hiasan kepala bulu kasuari, kalung kerang, dan tas noken.')">
+      <div class="img-wrap">
+        <img src="pa-baju.png" alt="Baju Adat Papua" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🪶</div>
+        <span class="img-label" style="background:#E63946">BAJU ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Baju Adat Papua</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="papua" onclick="openLight('pa-makan.webp','🍚','Papeda','Papeda adalah makanan pokok tradisional khas Papua dan Maluku berupa bubur sagu kental bertekstur lengket, bening, dan berwarna putih yang terbuat dari tepung sagu. Makanan ini rasanya tawar, kaya serat, rendah kolesterol, dan bernutrisi tinggi, umumnya disajikan bersama ikan kuah kuning')">
+      <div class="img-wrap">
+        <img src="pa-makan.webp" alt="Papeda" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🍚</div>
+        <span class="img-label" style="background:#FF9F1C">MAKANAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Papeda</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="papua" onclick="openLight('pa-tifa.jpg','🪘','Tifa','Tifa adalah alat musik pukul tradisional khas Indonesia Timur, terutama Papua dan Maluku, yang berbentuk tabung menyerupai kendang. Terbuat dari kayu yang dilubangi tengahnya dan ditutup kulit hewan (rusa/soa-soa) di satu sisi, Tifa dimainkan dengan cara dipukul untuk mengiringi tari perang, upacara adat, dan pesta')">
+      <div class="img-wrap">
+        <img src="pa-tifa.jpg" alt="Tifa" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🪘</div>
+        <span class="img-label" style="background:#2DC653">ALAT MUSIK</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Tifa</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="papua" onclick="openLight('pa-rumah.jpg','🛖','Rumah Honai','Rumah Honai adalah rumah adat tradisional khas suku Dani dan suku-suku lain di wilayah Pegunungan Tengah Papua, seperti Lani dan Yali. Rumah ini berbentuk bulat dengan atap kerucut dari jerami, dinding kayu, tanpa jendela, dan satu pintu kecil, yang dirancang khusus untuk menahan hawa dingin ekstrem dan angin kencang')">
+      <div class="img-wrap">
+        <img src="pa-rumah.jpg" alt="Rumah Honai" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🛖</div>
+        <span class="img-label" style="background:#457B9D">RUMAH ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Rumah Honai</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="papua" onclick="openLight('pa-tari.jpg','🌿','Tari Sajojo','Tari Sajojo adalah tarian tradisional energik dari Papua, populer sejak 1990-an, yang melambangkan kegembiraan, kebersamaan, dan penyambutan tamu. Tarian ini diiringi lagu ceria tentang gadis desa yang dikagumi dan diiringi alat musik tradisional seperti tifa. Gerakannya dinamis, dilakukan kompak oleh pria dan wanita segala usia.')">
+      <div class="img-wrap">
+        <img src="pa-tari.jpg" alt="Tari Sajojo" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🌿</div>
+        <span class="img-label" style="background:#7B2FBE">TARIAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Tari Sajojo</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="papua" onclick="openLight('pa-mumi.jpg','🦜','Mumi Papua','Mumi Papua adalah tradisi pengawetan jenazah leluhur khas suku-suku di Pegunungan Tengah (terutama Dani) yang berusia sekitar 300 tahun lebih. Mumi ini berwujud utuh dengan warna gelap, disimpan dalam rumah Honai, dan disakralkan sebagai simbol kehormatan, bukan dikubur atau dibakar, terutama bagi kepala suku atau panglima perang yang dihormati')">
+      <div class="img-wrap">
+        <img src="pa-mumi.jpg" alt="Burung Cenderawasih" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🦜</div>
+        <span class="img-label" style="background:#6c63ff">WARISAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Mumi Papua</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <!-- ══ SULAWESI SELATAN ══ -->
+    <div class="image-card hidden" data-cat="sulawesi" onclick="openLight('sulsel-baju.webp','👔','Baju Bella Dada','Baju Bella Dada adalah pakaian adat pria khas Sulawesi Selatan, khususnya suku Bugis-Makassar, yang melambangkan status dan keanggunan. Baju ini berbentuk jas tutup berlengan panjang, berkerah Shanghai, dengan belahan depan yang dilengkapi kancing emas atau perak. Umumnya dipakai dalam upacara adat dan acara formal.')">
+      <div class="img-wrap">
+        <img src="sulsel-baju.webp" alt="Baju Bodo" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">👔</div>
+        <span class="img-label" style="background:#E63946">BAJU ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Baju Bella Dada</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="sulawesi" onclick="openLight('sulsel-makan.jpg','🍲','Coto Makassar','Coto Makassar adalah hidangan sup tradisional khas Makassar, Sulawesi Selatan, yang terbuat dari potongan daging sapi dan jeroan (seperti hati, paru, jantung, usus, dan babat) yang direbus dalam bumbu rempah-rempah khusus.')">
+      <div class="img-wrap">
+        <img src="sulsel-makan.jpg" alt="Coto Makassar" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🍲</div>
+        <span class="img-label" style="background:#FF9F1C">MAKANAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Coto Makassar</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="sulawesi" onclick="openLight('sulsel-musik.jpg','🎵','Tolindo','Tolindo (atau Popondi) adalah alat musik tradisional petik dari Sulawesi Selatan, khususnya populer di kalangan masyarakat Bugis dan Makassar. Alat ini berbentuk busur seperti tanduk kerbau yang bertumpu pada tempurung kelapa sebagai resonator dan memiliki satu senar. Dimainkan dengan cara dipetik untuk menghasilkan nada khas')">
+      <div class="img-wrap">
+        <img src="sulsel-musik.jpg" alt="Kecapi Bugis" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🎵</div>
+        <span class="img-label" style="background:#2DC653">ALAT MUSIK</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Tolindo</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="sulawesi" onclick="openLight('sulsel-rumah.jpg','🏠','Tongkonan','Rumah Tongkonan (Suku Toraja): Berbentuk rumah panggung dengan atap melengkung menyerupai perahu atau tanduk kerbau. Tongkonan digunakan sebagai pusat kehidupan sosial dan keluarga, serta dihiasi ukiran berwarna merah, kuning, putih, dan hitam yang melambangkan status sosial')">
+      <div class="img-wrap">
+        <img src="sulsel-rumah.jpg" alt="Tongkonan" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🏠</div>
+        <span class="img-label" style="background:#457B9D">RUMAH ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Tongkonan</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="sulawesi" onclick="openLight('sulsel-tari.jpg','💃','Tari Kipas Pakarena','Tari Kipas Pakarena adalah tarian tradisional dari Gowa, Sulawesi Selatan, yang melambangkan kelembutan, kesetiaan, dan kepatuhan perempuan Makassar. Ditampilkan dengan gerakan gemulai dan tempo lambat, tarian ini diiringi musik dinamis, menggunakan properti kipas, serta pakaian adat Baju Bodo.')">
+      <div class="img-wrap">
+        <img src="sulsel-tari.jpg" alt="Tari Pakarena" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">💃</div>
+        <span class="img-label" style="background:#7B2FBE">TARIAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Tari Kipas Pakarena</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="sulawesi" onclick="openLight('sulsel-peninggalan.jpg','⛵','Benteng Rotterdam','Benteng Rotterdam (atau Benteng Ujung Pandang) adalah benteng peninggalan Kerajaan Gowa-Tallo abad ke-16 (dibangun 1545) di Makassar, Sulawesi Selatan, yang kemudian dikuasai VOC Belanda. Benteng berbentuk penyu ini kini menjadi situs cagar budaya, museum (La Galigo), pusat kebudayaan, dan ikon wisata sejarah di Makasar.')">
+      <div class="img-wrap">
+        <img src="sulsel-peninggalan.jpg" alt="Perahu Pinisi" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">⛵</div>
+        <span class="img-label" style="background:#6c63ff">WARISAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Benteng Rotterdam</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <!-- ══ SUMATRA BARAT ══ -->
+    <div class="image-card hidden" data-cat="sumbar" onclick="openLight('sumbar-baju.webp','👒','Bondu Kanduang','Baju adat Bundo Kanduang, atau Limpapeh Rumah Nan Gadang, adalah pakaian tradisional perempuan Minangkabau yang sudah menikah, melambangkan peran ibu sebagai tiang tengah keluarga dan pemimpin adat. Pakaian ini khas dengan baju kurung beludru, sarung songket, dan hiasan kepala berbentuk tanduk kerbau, sarat akan makna filosofis mengenai kebijaksanaan dan martabat.')">
+      <div class="img-wrap">
+        <img src="sumbar-baju.webp" alt="Baju Adat Minangkabau" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">👒</div>
+        <span class="img-label" style="background:#E63946">BAJU ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Bondu Kanduang</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="sumbar" onclick="openLight('sumbar-makan.webp','🥩','Rendang','Rendang adalah masakan tradisional Minangkabau, Sumatera Barat, yang mendunia karena kelezatannya. Dibuat dari daging sapi (atau bahan lain) yang dimasak lama dengan santan dan rempah-rempah hingga kering, hitam, dan bumbu meresap. Dinobatkan sebagai salah satu makanan terenak versi CNN, rendang memiliki cita rasa pedas-gurih yang khas dan filosofi mendalam tentang kesabaran serta musyawarah.')">
+      <div class="img-wrap">
+        <img src="sumbar-makan.webp" alt="Rendang" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🥩</div>
+        <span class="img-label" style="background:#FF9F1C">MAKANAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Rendang</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="sumbar" onclick="openLight('sumbar-musik.webp','🎼','Saluang','Saluang adalah alat musik tiup sejenis suling yang terbuat dari bambu tipis atau talang. Ciri khasnya adalah teknik tiup manyisian angok (mengisihkan napas), sehingga bisa dimainkan tanpa terputus.')">
+      <div class="img-wrap">
+        <img src="sumbar-musik.webp" alt="Saluang" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🎼</div>
+        <span class="img-label" style="background:#2DC653">ALAT MUSIK</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Saluang</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="sumbar" onclick="openLight('sumbar-rumah.jpg','🏘️','Rumah Gadang','Rumah Gadang adalah rumah adat suku Minangkabau di Sumatera Barat, berciri khas atap runcing menyerupai tanduk kerbau (gonjong) dan arsitektur berbentuk kapal. Rumah panggung berbentuk persegi panjang ini berfungsi sebagai tempat tinggal keluarga matrilineal, pusat kegiatan adat, serta simbol kekeluargaan dan musyawarah.')">
+      <div class="img-wrap">
+        <img src="sumbar-rumah.jpg" alt="Rumah Gadang" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🏘️</div>
+        <span class="img-label" style="background:#457B9D">RUMAH ADAT</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Rumah Gadang</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="sumbar" onclick="openLight('sumbar-tari.png','🪘','Tari Piring','Tari Piring adalah tarian tradisional Minangkabau dari Sumatera Barat yang menampilkan atraksi ayunan piring di tangan dengan gerakan cepat dan teratur. Tarian ini berasal dari Solok, awalnya sebagai ritual syukur atas hasil panen, namun kini dipentaskan untuk penyambutan tamu terhormat, pesta pernikahan, dan festival kebudayaan.')">
+      <div class="img-wrap">
+        <img src="sumbar-tari.png" alt="Tari Piring" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🪘</div>
+        <span class="img-label" style="background:#7B2FBE">TARIAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Tari Piring</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+    <div class="image-card hidden" data-cat="sumbar" onclick="openLight('sumbar-jam.jpg','🕰️','Jam Gadang','Jam Gadang adalah menara jam ikonik setinggi 26-27 meter di Bukittinggi, Sumatra Barat, dibangun tahun 1926-1927 sebagai hadiah Ratu Belanda kepada Rook Maker, sekretaris Fort de Kock. Dirancang oleh Yazid Rajo Mangkuto, ikon ini unik karena dibangun tanpa semen, menggunakan campuran kapur, pasir putih, dan putih telur.')">
+      <div class="img-wrap">
+        <img src="sumbar-jam.jpg" alt="Jam Gadang" onerror="this.classList.add('error')">
+        <div class="emoji-fallback">🕰️</div>
+        <span class="img-label" style="background:#6c63ff">WARISAN</span>
+      </div>
+      <div class="card-info">
+        <div class="card-title">Jam Gadang</div>
+        <div class="card-desc"></div>
+      </div>
+    </div>
+
+  </div>
+  <!-- /image-grid -->
+
+  <a href="evaluasi.html" class="btn-primary">📝 Mulai Evaluasi →</a>
+
+</main>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightOutside(event)">
+  <div class="lightbox-content">
+    <button class="lightbox-close" onclick="closeLight()">✕</button>
+    <div class="lightbox-img-wrap" id="lbImgWrap">
+      <span id="lbEmoji"></span>
+      <img id="lbPhoto" src="" alt="" style="display:none">
+    </div>
+    <div class="lightbox-title" id="lbTitle"></div>
+    <div class="lightbox-desc" id="lbDesc"></div>
+    <button class="btn-primary" onclick="closeLight()">Mengerti! 👍</button>
+  </div>
+</div>
+
+<script>
+  function filterCat(cat, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.image-card').forEach(card => {
+      card.classList.toggle('hidden', card.dataset.cat !== cat);
+    });
+  }
+
+  function openLight(imgSrc, emoji, title, desc) {
+    const lbPhoto = document.getElementById('lbPhoto');
+    const lbEmoji = document.getElementById('lbEmoji');
+    document.getElementById('lbTitle').textContent = title;
+    document.getElementById('lbDesc').textContent  = desc;
+    lbPhoto.src = imgSrc;
+    lbPhoto.alt = title;
+    lbPhoto.style.display = 'block';
+    lbEmoji.textContent = '';
+    lbPhoto.onerror = function() {
+      lbPhoto.style.display = 'none';
+      lbEmoji.textContent = emoji;
+    };
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLight() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeLightOutside(e) {
+    if (e.target === document.getElementById('lightbox')) closeLight();
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLight(); });
+</script>
+</body>
+</html>
